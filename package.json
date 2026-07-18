@@ -1,0 +1,54 @@
+{
+  "name": "video-studio",
+  "productName": "Video Studio",
+  "version": "1.0.0",
+  "description": "Screen-recording and lightweight video editor for the Water Resources training program.",
+  "author": "Water Resources",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.gha.videostudio",
+    "productName": "Video Studio",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "support.js",
+      "vendor/**/*",
+      "_ds/**/*",
+      "build/icon.*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.video",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "category": "AudioVideo",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
+  }
+}

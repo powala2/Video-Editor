@@ -1,5 +1,8 @@
-# Dependencies (none required — this is a static site)
+# Dependencies
 node_modules/
+
+# Electron build output
+dist/
 
 # OS / editor cruft
 .DS_Store

@@ -12,6 +12,12 @@
      these two scripts before it keeps everything self-contained and offline. -->
 <script src="./vendor/react.production.min.js"></script>
 <script src="./vendor/react-dom.production.min.js"></script>
+<!-- Mark resources as already bundled so the runtime doesn't re-fetch the
+     document to re-parse its own template. That fetch is a no-op refinement
+     (the inline <x-dc> template is already used), but under the file://
+     protocol the desktop shell loads from, a cross-origin fetch is CORS-blocked
+     and logs an error. Setting this flag skips it cleanly. -->
+<script>window.__resources = window.__resources || {};</script>
 <script src="./support.js"></script>
 </head>
 <body>
