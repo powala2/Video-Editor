@@ -1,0 +1,47 @@
+/* ============================================================
+   GHA Water Resources — Spacing & radii tokens
+   The source app does not use a formal 4/8px grid — paddings are
+   tuned per-component (9px, 11px, 13px, etc). These tokens name the
+   literal values that recur most often so new components can reach
+   for a token instead of a magic number; where nothing recurs,
+   components should keep the exact literal from the pattern they follow.
+   ============================================================ */
+
+:root {
+  /* ---- Spacing scale (literal, recurring paddings/gaps) ---- */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --space-6: 14px;
+  --space-7: 16px;
+  --space-8: 20px;
+  --space-9: 22px;
+  --space-10: 26px;
+  --space-11: 32px;
+  --space-12: 40px;
+
+  /* ---- Radii (literal, recurring corner values) ---- */
+  --radius-xs: 5px;   /* small chips, checkboxes */
+  --radius-sm: 7px;   /* inputs, small buttons */
+  --radius-md: 8px;   /* toolbar buttons, footer buttons */
+  --radius-lg: 9px;   /* form fields, pick rows */
+  --radius-xl: 10px;  /* course cards (database), assign pills */
+  --radius-2xl: 13px; /* curriculum course cards */
+  --radius-3xl: 14px; /* database section cards */
+  --radius-4xl: 16px; /* assignment cards, table wraps, modal-adjacent surfaces */
+  --radius-5xl: 20px; /* login card */
+  --radius-pill: 999px;
+
+  /* ---- Motion (verbatim easing curves from the source) ---- */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* @kind other */     /* accordion / expand rows */
+  --ease-overshoot: cubic-bezier(0.34, 1.4, 0.5, 1); /* @kind other */ /* button hover lift */
+  --ease-overshoot-lg: cubic-bezier(0.34, 1.56, 0.5, 1); /* @kind other */ /* cell "pop" on toggle */
+  --ease-entrance: cubic-bezier(0.22, 0.9, 0.3, 1); /* @kind other */  /* card/login entrance */
+  --duration-fast: 0.15s; /* @kind other */
+  --duration-base: 0.18s; /* @kind other */
+  --duration-hover: 0.16s; /* @kind other */
+  --duration-expand: 0.3s; /* @kind other */
+  --duration-expand-lg: 0.34s; /* @kind other */
+}

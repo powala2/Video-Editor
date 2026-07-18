@@ -1,0 +1,73 @@
+/* ============================================================
+   GHA Water Resources — Base resets
+   Verbatim from src/styles/theme.css (non-token rules).
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: oklch(0.705 0.135 68 / 0.26);
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0.86 0.014 92);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.72 0.05 150);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+input,
+select,
+button {
+  font-family: var(--font-sans);
+}
+input:focus,
+select:focus {
+  outline: none;
+  border-color: oklch(0.55 0.09 158) !important;
+  box-shadow: 0 0 0 3px oklch(0.55 0.09 158 / 0.15);
+}
+::placeholder {
+  color: oklch(0.68 0.015 100);
+}
+h1,
+h2,
+h3 {
+  font-feature-settings: 'liga' 1, 'kern' 1;
+  margin: 0;
+}
+button {
+  font: inherit;
+}
+
+a {
+  color: var(--primary-hex);
+}
+a:hover {
+  color: var(--primary-deep-hex);
+}

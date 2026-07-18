@@ -1,0 +1,38 @@
+/* ============================================================
+   GHA Water Resources — Typography tokens
+   Fonts: Newsreader (serif, headings) + Hanken Grotesk (sans, UI/body).
+   Both are Google Fonts — loaded via @import in styles.css rather
+   than self-hosted files, since the source project links them the
+   same way (see index.html) and no local font binaries exist to copy.
+   ============================================================ */
+
+:root {
+  --font-serif: 'Newsreader', serif;
+  --font-sans: 'Hanken Grotesk', system-ui, sans-serif;
+
+  /* ---- Type scale (literal sizes as used in the app, not snapped
+     to a grid — smallest tag text really is 9px in the source) ---- */
+  --text-3xs: 9px;    /* skill/est/unavail tags, matrix tiny labels */
+  --text-2xs: 10px;   /* overlines, badges, chevron-adjacent labels */
+  --text-xs: 11px;    /* field labels, meta, legend */
+  --text-sm: 12px;    /* chips, secondary buttons, table cells */
+  --text-base: 13px;  /* body copy, inputs, nav labels */
+  --text-md: 14px;    /* names, emphasized row text */
+  --text-lg: 15px;    /* card titles, modal titles (serif) */
+  --text-xl: 18px;    /* curriculum level name (serif) */
+  --text-2xl: 25px;   /* login title (serif) */
+  --text-3xl: 26px;   /* page header title (serif) */
+
+  /* ---- Weights ---- */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-black: 800;
+
+  /* ---- Letter-spacing (uppercase labels / overlines) ---- */
+  --tracking-overline: 0.15em;
+  --tracking-label: 0.03em;
+  --tracking-badge: 0.04em;
+  --tracking-group: 0.06em;
+}

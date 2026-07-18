@@ -1,0 +1,117 @@
+/* ============================================================
+   GHA Water Resources — Color tokens
+   Base palette copied verbatim from src/styles/theme.css, plus
+   semantic aliases lifted from literal hex values used throughout
+   the app's component CSS (Header/Sidebar/views). Kept as literal
+   hex (not re-derived through oklch) so consumers get the exact
+   values the source uses.
+   ============================================================ */
+
+:root {
+  /* ---- Base surface & ink (oklch, verbatim from theme.css) ---- */
+  --bg: oklch(0.96 0.011 96);
+  --bg-2: oklch(0.936 0.015 96);
+  --surface: oklch(0.996 0.004 95);
+  --surface-2: oklch(0.978 0.008 95);
+  --glass: oklch(0.986 0.006 96 / 0.66);
+  --glass-line: oklch(1 0 0 / 0.5);
+  --ink: oklch(0.265 0.022 158);
+  --muted: oklch(0.545 0.02 120);
+  --primary: oklch(0.455 0.09 160);
+  --primary-deep: oklch(0.32 0.068 162);
+  --accent: oklch(0.705 0.135 68);
+  --border: oklch(0.892 0.013 92);
+  --border-soft: oklch(0.93 0.01 92);
+
+  /* ---- Primary (forest green) hex equivalents used inline ---- */
+  --primary-hex: #2f6b4c;
+  --primary-deep-hex: #234c39;
+
+  /* ---- Text ink scale (literal hex used across views) ---- */
+  --text-heading: #234c39;   /* serif titles: header title, card titles */
+  --text-heading-2: #33403a; /* dense UI text (row titles, names) */
+  --text-body: #2b332e;      /* input text, dark body copy */
+  --text-muted: #5c6660;     /* secondary copy, labels */
+  --text-faint: #8a8570;     /* meta text, placeholders-adjacent */
+  --text-faint-2: #9a957f;   /* lightest meta / helper text */
+  --text-disabled: #b0a794;
+
+  /* ---- Gold / brass accent (course codes, inline-edit affordance) ---- */
+  --gold-ink: #a88a3e;
+  --gold-ink-2: #b79e5e;
+  --gold-line: #c9a94e;
+  --gold-surface: #fbf6e9;
+
+  /* ---- Hairlines / dividers (literal, do not consolidate) ---- */
+  --line: #efeadd;
+  --line-2: #e7e1d3;
+  --line-3: #f3eee1;
+  --line-4: #f0ecde;
+  --line-input: #e0d9c7;
+  --line-input-2: #ddd6c6;
+  --line-dashed: #cfc7b0;
+
+  /* ---- Semantic status: success / complete ---- */
+  --success-ink: #2f6b4c;
+  --success-bg: #e1eee6;
+  --success-bg-strong: #e9f1eb;
+  --success-border: #bbd8c4;
+
+  /* ---- Semantic status: warning / in progress ---- */
+  --warning-ink: #8a6a1e;
+  --warning-bg: #f6ecd1;
+  --warning-border: #e7d5a2;
+  --warning-swatch: #f1c75a; /* solid amber used for matrix "in progress" cells */
+
+  /* ---- Semantic status: danger / unavailable / destructive ---- */
+  --danger-ink: #b4553e;
+  --danger-bg: #fbede8;
+  --danger-border: #ead1c7;
+
+  /* ---- Semantic status: neutral / not started ---- */
+  --neutral-ink: #8a8570;
+  --neutral-bg: #f0ecde;
+  --neutral-border: #e2dbc9;
+
+  /* ---- Resource-type icon chips (doc/video/link/activity/esri/quiz) ---- */
+  --icon-doc-ink: #2f6b4c;
+  --icon-doc-bg: #e4f0e9;
+  --icon-video-ink: #b8912f;
+  --icon-video-bg: #f8efd6;
+  --icon-esri-ink: #2c7a7b;
+  --icon-esri-bg: #def0f0;
+  --icon-activity-ink: #9a6a2e;
+  --icon-activity-bg: #f4ebdb;
+  --icon-quiz-ink: #3a8b5c;
+  --icon-quiz-bg: #e4f2e9;
+  --icon-default-ink: #6b7280;
+  --icon-default-bg: #eeefef;
+
+  /* ---- Skill proficiency scale (SkillsView) ---- */
+  --prof-none-bg: #f4f1e8;
+  --prof-none-border: #e2dbc9;
+  --prof-none-ink: #b0a98f;
+  --prof-learning-bg: #f6ecd1;
+  --prof-learning-border: #e7d5a2;
+  --prof-learning-ink: #8a6a1e;
+  --prof-proficient-bg: #dcebe1;
+  --prof-proficient-border: #b8d6c3;
+  --prof-proficient-ink: #2f6b4c;
+  --prof-expert-bg: #234c39;
+  --prof-expert-border: #234c39;
+  --prof-expert-ink: #eaf2eb;
+
+  /* ---- Misc surfaces ---- */
+  --card-bg: #ffffff;
+  --head-strip-bg: #fbfaf5;   /* card head strips, table header rows */
+  --progress-track: #eae4d5;
+  --sidebar-active-bg: #e9f1eb;
+  --avatar-bg: #2f6b4c;
+  --avatar-ink: #ffffff;
+
+  /* ---- Shadows (verbatim from theme.css) ---- */
+  --shadow-sm: 0 1px 2px oklch(0.3 0.04 150 / 0.05), 0 3px 10px -4px oklch(0.3 0.05 150 / 0.12);
+  --shadow-card: 0 1px 2px oklch(0.3 0.04 150 / 0.05), 0 20px 44px -22px oklch(0.3 0.06 150 / 0.24);
+  --shadow-float: 0 2px 12px oklch(0.3 0.04 150 / 0.12), 0 40px 90px -30px oklch(0.28 0.08 150 / 0.44);
+  --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.28);
+}

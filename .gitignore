@@ -1,0 +1,12 @@
+# Dependencies (none required — this is a static site)
+node_modules/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Local dev
+*.log

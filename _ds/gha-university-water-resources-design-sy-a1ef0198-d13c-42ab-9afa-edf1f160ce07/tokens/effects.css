@@ -1,0 +1,38 @@
+/* ============================================================
+   GHA Water Resources — Surface effects
+   Grain + topo-contour texture layered under the page background,
+   plus the glass/blur treatment used on the sticky Header and Sidebar.
+   Verbatim from src/styles/theme.css.
+   ============================================================ */
+
+:root {
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); /* @kind other */
+  --contour: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' fill='none' stroke='%232f6b4c' stroke-width='1' opacity='0.06'%3E%3Cpath d='M-60 70 C90 24 210 118 340 70 470 22 590 118 720 70'/%3E%3Cpath d='M-60 150 C90 104 210 198 340 150 470 102 590 198 720 150'/%3E%3Cpath d='M-60 230 C90 184 210 278 340 230 470 182 590 278 720 230'/%3E%3Cpath d='M-60 310 C90 264 210 358 340 310 470 262 590 358 720 310'/%3E%3Cpath d='M-60 390 C90 344 210 438 340 390 470 342 590 438 720 390'/%3E%3Cpath d='M-60 470 C90 424 210 518 340 470 470 422 590 518 720 470'/%3E%3C/svg%3E"); /* @kind other */
+
+  --blur-glass: blur(20px) saturate(1.5); /* @kind other */
+}
+
+/* Page background: soft radial highlights + topo contour + grain,
+   fixed so it doesn't scroll with content. Apply to <body>. */
+.gha-page-bg {
+  background-color: var(--bg);
+  background-image: radial-gradient(1200px 620px at 100% -8%, oklch(0.58 0.075 162 / 0.14), transparent 60%),
+    radial-gradient(940px 560px at -12% 112%, oklch(0.72 0.12 70 / 0.09), transparent 55%), var(--contour), var(--grain);
+  background-repeat: no-repeat, no-repeat, repeat, repeat;
+  background-size: auto, auto, 520px 520px, 140px 140px;
+  background-attachment: fixed;
+}
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cellPop {
+  0% { transform: scale(0.68); }
+  55% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
