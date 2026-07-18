@@ -1,0 +1,51 @@
+name: Build Windows app
+
+# Builds the Windows .exe on a GitHub-hosted Windows runner (which, unlike a
+# local restricted network, can download Electron). Runs automatically on
+# every push to the implementation branch, and can be started by hand from the
+# Actions tab ("Run workflow"). Pushing a version tag (e.g. v1.0.0) also
+# attaches the .exe files to a GitHub Release.
+
+on:
+  push:
+    branches:
+      - claude/video-studio-implementation-7vr7t0
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Windows installer + portable exe
+        run: npm run dist -- --win --x64
+
+      - name: Upload the .exe files as a downloadable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Video-Studio-Windows
+          path: dist/*.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attach .exe files to a Release (tagged builds only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.exe
