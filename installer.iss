@@ -1,10 +1,20 @@
 ; Inno Setup script — builds "VideoStudioSetup.exe" from the PyInstaller
 ; one-folder build in dist\Video Studio\.
+;
+; Version is passed in by CI (iscc /DAppVer=1.2.3) so it stays in lockstep with
+; videostudio.__version__; defaults here for local builds.
+
+#ifndef AppVer
+  #define AppVer "1.0.0"
+#endif
 
 [Setup]
 AppName=Video Studio
-AppVersion=1.0.0
+AppVersion={#AppVer}
 AppPublisher=Water Resources
+; Let the silent auto-updater replace a running install cleanly.
+CloseApplications=yes
+RestartApplications=no
 DefaultDirName={autopf}\Video Studio
 DefaultGroupName=Video Studio
 DisableProgramGroupPage=yes

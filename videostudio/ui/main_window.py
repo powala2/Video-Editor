@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QMainWindow, QStackedWidget
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QMainWindow, QStackedWidget, QMessageBox
 
+from .. import __version__
 from ..model import Project
+from . import updates
 from .library import LibraryView
 from .editor import EditorView
 
@@ -30,7 +33,29 @@ class MainWindow(QMainWindow):
         self.library.importVideo.connect(self._new_import)
         self.editor.backRequested.connect(self._go_home)
 
+        self._build_menu()
         self.library.refresh()
+
+        # Check for updates shortly after launch (packaged builds only).
+        QTimer.singleShot(1500, lambda: updates.run_startup_check(self))
+
+    def _build_menu(self):
+        menu = self.menuBar().addMenu("&Help")
+        check = QAction("Check for updates…", self)
+        check.triggered.connect(lambda: updates.manual_check(self))
+        menu.addAction(check)
+        about = QAction("About Video Studio", self)
+        about.triggered.connect(self._about)
+        menu.addAction(about)
+
+    def _about(self):
+        QMessageBox.about(
+            self, "About Video Studio",
+            f"<b>Video Studio</b> {__version__}<br>"
+            "Screen recorder and video editor for the Water Resources "
+            "training program.<br><br>Updates install automatically from the "
+            "project's public releases.",
+        )
 
     def _open_project(self, project: Project):
         self.editor.set_project(project)

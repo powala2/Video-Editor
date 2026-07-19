@@ -46,7 +46,10 @@ jobs:
         shell: pwsh
         run: |
           choco install innosetup --no-progress -y
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          # Keep the installer version in lockstep with videostudio.__version__.
+          $ver = python -c "import videostudio, sys; sys.stdout.write(videostudio.__version__)"
+          Write-Host "Building installer for version $ver"
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppVer=$ver" installer.iss
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

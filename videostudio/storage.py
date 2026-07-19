@@ -59,3 +59,37 @@ def delete_project(project: Project) -> None:
         os.remove(project_path(project))
     except OSError:
         pass
+
+
+# -- app settings (small JSON blob: update prefs, etc.) ------------------
+import json
+
+
+def _settings_path() -> str:
+    return os.path.join(app_dir(), "settings.json")
+
+
+def load_settings() -> dict:
+    try:
+        with open(_settings_path(), "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, ValueError):
+        return {}
+
+
+def save_settings(data: dict) -> None:
+    try:
+        with open(_settings_path(), "w", encoding="utf-8") as fh:
+            json.dump(data, fh, indent=2)
+    except OSError:
+        pass
+
+
+def get_setting(key: str, default=None):
+    return load_settings().get(key, default)
+
+
+def set_setting(key: str, value) -> None:
+    data = load_settings()
+    data[key] = value
+    save_settings(data)

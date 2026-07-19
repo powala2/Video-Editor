@@ -53,6 +53,36 @@ Every push builds a Windows installer and a portable zip in the cloud:
 The app isn't code-signed, so Windows may show **"Windows protected your PC"** the
 first time — click **More info → Run anyway**.
 
+## Automatic updates
+
+Installed builds update themselves — users never download a new version by hand.
+
+On launch the app checks this repository's **latest public Release**, and if a
+newer version exists it offers **"Update & restart"**: it downloads the new
+installer, and a small helper applies it after the app closes and relaunches it.
+Users can also trigger a check from **Help → Check for updates…**, and "Skip this
+version" is remembered. The check is silent when you're already up to date or
+offline, and it's disabled when running from source.
+
+This works with **no secret embedded in the app** because the Releases are
+public — so the repository (or at least its Releases) must be public for
+auto-update to reach users.
+
+### Publishing an update (maintainer)
+
+1. Bump the version in `videostudio/__init__.py` (`__version__`).
+2. Commit, then tag and push:
+   ```bash
+   git tag v1.0.1 && git push origin v1.0.1
+   ```
+3. The **Build Windows app** workflow builds the installer (its version is taken
+   from `__version__`) and publishes a GitHub **Release** for the tag with
+   `VideoStudioSetup.exe` attached.
+
+Every running copy on an older version will detect `v1.0.1` on next launch and
+offer to update. (The installer asset must keep a name ending in `Setup.exe` —
+that's how the updater finds it.)
+
 ## Run from source
 
 ```bash
