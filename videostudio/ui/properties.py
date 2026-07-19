@@ -61,11 +61,30 @@ class PropertiesPanel(QWidget):
         self.kind, self.ident = kind, ident
         self._clear()
         if not self.project or not kind:
-            self._root.addWidget(self._overline("Properties"))
-            hint = QLabel("Select a clip, zoom, or caption on the timeline to edit it.")
-            hint.setObjectName("Faint")
+            self._root.addWidget(self._overline("PROPERTIES"))
+            hint = QLabel("Nothing selected. Click a block on the timeline "
+                          "to edit it here.")
+            hint.setObjectName("Muted")
             hint.setWordWrap(True)
             self._root.addWidget(hint)
+
+            self._root.addSpacing(8)
+            self._root.addWidget(self._overline("HOW IT WORKS"))
+            for step in (
+                "①  Record your screen (R) or import\n     a video (I)",
+                "②  Drag a clip's edges on the timeline\n     to trim it",
+                "③  Split at the playhead (C) — delete\n     what you don't need (Del)",
+                "④  Add zoom push-ins (Z) and\n     captions (T)",
+                "⑤  Save video (Ctrl+E) renders the\n     final MP4",
+            ):
+                lbl = QLabel(step)
+                lbl.setObjectName("Faint")
+                self._root.addWidget(lbl)
+            tip = QLabel("Press F1 or the ? button for the full guide.")
+            tip.setObjectName("Faint")
+            tip.setWordWrap(True)
+            self._root.addSpacing(4)
+            self._root.addWidget(tip)
             self._root.addStretch(1)
             return
         if kind == "clip":
@@ -91,6 +110,7 @@ class PropertiesPanel(QWidget):
         self._root.addWidget(self._overline("Selected clip"))
         name = QLabel(media.name if media else "Clip")
         name.setObjectName("H2")
+        name.setWordWrap(True)
         self._root.addWidget(name)
         meta = QLabel(f"Screen recording · {clip.duration:.1f}s")
         meta.setObjectName("Faint")

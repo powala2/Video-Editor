@@ -42,14 +42,15 @@ class PreviewPanel(QWidget):
         self.audio.setVolume(0.9)
 
         self.video = QVideoWidget(self)
-        self.video.setStyleSheet("background:#0f1712;border-radius:12px;")
+        self.video.setStyleSheet("background:#0a0a0c;")
         self.player.setVideoOutput(self.video)
+        self._current = 0.0
 
         self.caption = QLabel(self.video)
         self.caption.setAlignment(Qt.AlignCenter)
         self.caption.setWordWrap(True)
         self.caption.setStyleSheet(
-            "background:rgba(15,23,18,0.82);color:#f4f1e8;font-size:16px;"
+            "background:rgba(10,10,12,0.82);color:#f4f4f6;font-size:16px;"
             "font-weight:600;padding:6px 14px;border-radius:8px;"
         )
         self.caption.hide()
@@ -72,14 +73,33 @@ class PreviewPanel(QWidget):
         h.setContentsMargins(14, 8, 14, 8)
         h.setSpacing(12)
 
+        back5 = QPushButton("‹‹")
+        back5.setObjectName("Tool")
+        back5.setFixedWidth(38)
+        back5.setToolTip("Back 5 seconds (Shift+←)")
+        back5.clicked.connect(lambda: self.jump(-5.0))
+        h.addWidget(back5)
+
         self.play_btn = QPushButton("▶")
         self.play_btn.setObjectName("Primary")
-        self.play_btn.setFixedSize(40, 36)
+        self.play_btn.setFixedSize(44, 36)
+        self.play_btn.setToolTip("Play / pause (Space)")
         self.play_btn.clicked.connect(self.toggle)
         h.addWidget(self.play_btn)
 
+        fwd5 = QPushButton("››")
+        fwd5.setObjectName("Tool")
+        fwd5.setFixedWidth(38)
+        fwd5.setToolTip("Forward 5 seconds (Shift+→)")
+        fwd5.clicked.connect(lambda: self.jump(5.0))
+        h.addWidget(fwd5)
+
         self.time_lbl = QLabel("0:00 / 0:00")
         self.time_lbl.setObjectName("Muted")
+        self.time_lbl.setStyleSheet(
+            f'color:{theme.TEXT_MUTED};'
+            f'font-family:"Consolas","SF Mono","Menlo",monospace;font-size:12px;'
+        )
         h.addWidget(self.time_lbl)
 
         self.scrub = QSlider(Qt.Horizontal)
@@ -90,9 +110,13 @@ class PreviewPanel(QWidget):
         self._scrubbing = False
         h.addWidget(self.scrub, 1)
 
-        h.addWidget(QLabel("Speed"))
+        spd = QLabel("Speed")
+        spd.setObjectName("Faint")
+        h.addWidget(spd)
         self.speed = QComboBox()
         self.speed.addItems(["1×", "1.5×", "2×"])
+        self.speed.setToolTip("Preview playback speed (doesn't affect the "
+                              "exported video)")
         self.speed.currentIndexChanged.connect(self._on_speed)
         h.addWidget(self.speed)
 
@@ -100,8 +124,11 @@ class PreviewPanel(QWidget):
         vol.setFixedWidth(90)
         vol.setRange(0, 100)
         vol.setValue(90)
+        vol.setToolTip("Preview volume")
         vol.valueChanged.connect(lambda v: self.audio.setVolume(v / 100))
-        h.addWidget(QLabel("🔊"))
+        vlbl = QLabel("Vol")
+        vlbl.setObjectName("Faint")
+        h.addWidget(vlbl)
         h.addWidget(vol)
 
         root.addWidget(bar)
@@ -173,6 +200,11 @@ class PreviewPanel(QWidget):
         rate = self._rate * (clip.speed if clip.speed > 0 else 1.0)
         self.player.setPlaybackRate(rate)
         self.player.setSource(self._clip_source_url(clip))
+
+    def jump(self, dt: float):
+        """Step the playhead by ``dt`` seconds, preserving play state."""
+        playing = self.player.playbackState() == QMediaPlayer.PlayingState
+        self.seek(self._current + dt, play=playing)
 
     def seek(self, timeline_t: float, play: bool = False):
         if not self.project or not self.project.clips:

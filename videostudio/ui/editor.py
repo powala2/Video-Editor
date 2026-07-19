@@ -5,10 +5,11 @@ from __future__ import annotations
 import os
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QFrame,
     QListWidget, QListWidgetItem, QScrollArea, QSlider, QFileDialog, QMessageBox,
-    QProgressDialog,
+    QProgressDialog, QApplication, QPlainTextEdit, QAbstractSpinBox,
 )
 
 from .. import theme, storage
@@ -64,6 +65,77 @@ class EditorView(QWidget):
         self.props.changed.connect(self._on_edited)
         self.props.deleteRequested.connect(self._delete_item)
 
+        self._add_shortcuts()
+
+    # ------------------------------------------------------------- shortcuts
+    def _add_shortcuts(self):
+        """Editor-wide keys. Plain-letter keys are suppressed while the user
+        is typing in a text field so they don't eat keystrokes."""
+
+        def guarded(fn, typing_guard=True):
+            def run():
+                # The window-level shortcut fires even while the library screen
+                # is shown — only act when the editor itself is visible.
+                if not self.isVisible():
+                    return
+                if typing_guard:
+                    w = QApplication.focusWidget()
+                    if isinstance(w, (QLineEdit, QPlainTextEdit, QAbstractSpinBox)):
+                        return
+                fn()
+            return run
+
+        for seq, fn, guard in (
+            ("Space", lambda: self.preview.toggle(), True),
+            ("C", self.split_at_playhead, True),
+            ("Ctrl+K", self.split_at_playhead, False),
+            ("Delete", self.delete_selected, True),
+            ("Backspace", self.delete_selected, True),
+            ("Z", self.add_zoom, True),
+            ("T", self.add_caption, True),
+            ("R", self.record, True),
+            ("I", self.import_video, True),
+            ("Left", lambda: self.preview.jump(-1.0), True),
+            ("Right", lambda: self.preview.jump(1.0), True),
+            ("Shift+Left", lambda: self.preview.jump(-5.0), True),
+            ("Shift+Right", lambda: self.preview.jump(5.0), True),
+            ("Home", lambda: self.preview.seek(0.0), True),
+            ("Ctrl+E", self.export_video, False),
+            ("F1", self.show_help, False),
+        ):
+            sc = QShortcut(QKeySequence(seq), self)
+            sc.activated.connect(guarded(fn, typing_guard=guard))
+
+    def show_help(self):
+        box = QMessageBox(self)
+        box.setWindowTitle("How to use Video Studio")
+        box.setTextFormat(Qt.RichText)
+        box.setText(
+            "<h3 style='margin-top:0'>Workflow</h3>"
+            "<ol style='margin-left:-18px'>"
+            "<li><b>Record</b> your screen or <b>Import</b> a video — it lands "
+            "on the <b>V1</b> track of the timeline.</li>"
+            "<li><b>Click a block</b> on the timeline to select it; its "
+            "settings appear in the right-hand panel.</li>"
+            "<li><b>Drag a clip's left/right edge</b> to trim it. "
+            "<b>Split</b> cuts at the blue playhead.</li>"
+            "<li>Add <b>Zoom</b> push-ins (FX track) and <b>Captions</b> "
+            "(T1 track), then <b>Save video</b> to render the MP4.</li>"
+            "</ol>"
+            "<h3>Keyboard shortcuts</h3>"
+            "<table cellspacing='0' cellpadding='3'>"
+            "<tr><td><b>Space</b></td><td>Play / pause</td>"
+            "<td width='30'></td><td><b>C</b> / <b>Ctrl+K</b></td><td>Split at playhead</td></tr>"
+            "<tr><td><b>Del</b></td><td>Delete selected</td>"
+            "<td></td><td><b>Z</b> / <b>T</b></td><td>Add zoom / caption</td></tr>"
+            "<tr><td><b>R</b> / <b>I</b></td><td>Record / import</td>"
+            "<td></td><td><b>← →</b></td><td>Step 1 s (Shift: 5 s)</td></tr>"
+            "<tr><td><b>Home</b></td><td>Jump to start</td>"
+            "<td></td><td><b>Ctrl+E</b></td><td>Save video</td></tr>"
+            "</table>"
+        )
+        box.exec()
+
     def _topbar(self):
         bar = QFrame()
         bar.setObjectName("TopBar")
@@ -76,19 +148,29 @@ class EditorView(QWidget):
         h.setSpacing(10)
         back = QPushButton("‹  Studio")
         back.setObjectName("Ghost")
+        back.setToolTip("Back to your project library")
         back.clicked.connect(self.backRequested.emit)
         h.addWidget(back)
 
         self.name_edit = QLineEdit("Untitled project")
         self.name_edit.setStyleSheet(
-            f"font-size:16px;font-weight:600;color:{theme.PRIMARY_DEEP};"
+            f"font-size:15px;font-weight:600;color:{theme.TEXT};"
             f"border:none;background:transparent;"
         )
+        self.name_edit.setToolTip("Project name — click to rename")
         self.name_edit.editingFinished.connect(self._rename)
         h.addWidget(self.name_edit, 1)
 
-        self.export_btn = QPushButton("⬇  Save video")
+        help_btn = QPushButton("?")
+        help_btn.setObjectName("Tool")
+        help_btn.setFixedWidth(34)
+        help_btn.setToolTip("How to use Video Studio (F1)")
+        help_btn.clicked.connect(self.show_help)
+        h.addWidget(help_btn)
+
+        self.export_btn = QPushButton("Save video")
         self.export_btn.setObjectName("Primary")
+        self.export_btn.setToolTip("Render the timeline to an MP4 file (Ctrl+E)")
         self.export_btn.clicked.connect(self.export_video)
         h.addWidget(self.export_btn)
         return bar
@@ -100,17 +182,23 @@ class EditorView(QWidget):
         v = QVBoxLayout(panel)
         v.setContentsMargins(12, 12, 12, 12)
         v.setSpacing(10)
-        lbl = QLabel("MEDIA BIN")
+        lbl = QLabel("PROJECT MEDIA")
         lbl.setObjectName("Overline")
         v.addWidget(lbl)
         self.bin = QListWidget()
+        self.bin.setToolTip("Media used in this project — click to jump to it "
+                            "on the timeline")
+        self.bin.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.bin.setTextElideMode(Qt.ElideRight)
         self.bin.itemClicked.connect(self._bin_clicked)
         v.addWidget(self.bin, 1)
         imp = QPushButton("＋  Import video")
+        imp.setToolTip("Add a video file to the timeline (I)")
         imp.clicked.connect(self.import_video)
         v.addWidget(imp)
-        rec = QPushButton("●  New recording")
+        rec = QPushButton("●  Record screen")
         rec.setObjectName("Primary")
+        rec.setToolTip("Capture your screen and microphone (R)")
         rec.clicked.connect(self.record)
         v.addWidget(rec)
         return panel
@@ -144,22 +232,30 @@ class EditorView(QWidget):
 
         tools = QHBoxLayout()
         tools.setSpacing(6)
-        for text, slot, obj in (
-            ("✂  Split", self.split_at_playhead, "Tool"),
-            ("🗑  Delete", self.delete_selected, "Tool"),
-            ("🔍  Add zoom", self.add_zoom, "Tool"),
-            ("🅣  Add caption", self.add_caption, "Tool"),
+        for text, slot, tip in (
+            ("Split", self.split_at_playhead,
+             "Cut the clip in two at the playhead (C or Ctrl+K)"),
+            ("Delete", self.delete_selected,
+             "Remove the selected clip, zoom or caption (Del)"),
+            ("＋ Zoom", self.add_zoom,
+             "Add a push-in zoom at the playhead — appears on the FX track (Z)"),
+            ("＋ Caption", self.add_caption,
+             "Add a text caption at the playhead — appears on the T1 track (T)"),
         ):
             b = QPushButton(text)
-            b.setObjectName(obj)
+            b.setObjectName("Tool")
+            b.setToolTip(tip)
             b.clicked.connect(slot)
             tools.addWidget(b)
         tools.addStretch(1)
-        tools.addWidget(QLabel("Timeline zoom"))
+        zl = QLabel("Zoom")
+        zl.setObjectName("Faint")
+        tools.addWidget(zl)
         zoom = QSlider(Qt.Horizontal)
         zoom.setFixedWidth(120)
         zoom.setRange(12, 120)
         zoom.setValue(45)
+        zoom.setToolTip("Timeline zoom — spread the tracks out or fit more in view")
         zoom.valueChanged.connect(lambda v: self.timeline.set_pps(float(v)))
         tools.addWidget(zoom)
         v.addLayout(tools)
