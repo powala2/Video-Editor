@@ -1,8 +1,12 @@
 name: Build Windows app
 
 # Builds the Python (PySide6) desktop app into a Windows installer + a portable
-# zip on a GitHub-hosted Windows runner. Runs on push to the implementation
-# branch, on manual dispatch, and on version tags (which also publish a Release).
+# zip on a GitHub-hosted Windows runner, and publishes a GitHub Release for the
+# current version so the app's auto-updater can find it.
+#
+# The Release tag/version comes from videostudio.__version__ — bump that to ship
+# an update. Publishing happens on pushes to the implementation branch, on
+# version tags (v*), and on manual dispatch.
 
 on:
   push:
@@ -28,6 +32,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Determine version
+        id: ver
+        shell: pwsh
+        run: |
+          $ver = python -c "import videostudio, sys; sys.stdout.write(videostudio.__version__)"
+          "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Video Studio version $ver"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -46,12 +58,9 @@ jobs:
         shell: pwsh
         run: |
           choco install innosetup --no-progress -y
-          # Keep the installer version in lockstep with videostudio.__version__.
-          $ver = python -c "import videostudio, sys; sys.stdout.write(videostudio.__version__)"
-          Write-Host "Building installer for version $ver"
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppVer=$ver" installer.iss
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppVer=${{ steps.ver.outputs.version }}" installer.iss
 
-      - name: Upload artifacts
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Video-Studio-Windows
@@ -61,10 +70,23 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Attach to Release (tagged builds only)
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Publish Release
+        if: >-
+          github.event_name == 'workflow_dispatch'
+          || startsWith(github.ref, 'refs/tags/')
+          || github.ref == 'refs/heads/claude/video-studio-implementation-7vr7t0'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: Video Studio v${{ steps.ver.outputs.version }}
+          make_latest: true
+          body: |
+            Automated build of **Video Studio v${{ steps.ver.outputs.version }}**.
+
+            - **VideoStudioSetup.exe** — Windows installer (recommended).
+            - **VideoStudio-Windows-portable.zip** — unzip and run `Video Studio.exe`.
+
+            Installed copies update to this automatically.
           files: |
             installer_out/VideoStudioSetup.exe
             VideoStudio-Windows-portable.zip
