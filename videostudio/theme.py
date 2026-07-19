@@ -23,6 +23,20 @@ TRACK_SCREEN = "#2f6b4c"
 TRACK_ZOOM = "#c9a94e"
 TRACK_CAPTION = "#3b7f8a"
 
+# --- Recording overlay: a self-contained dark "Premiere Pro" palette. The
+# capture HUD floats over the user's whole screen, so it reads far better as a
+# dark, low-glare panel than as the light app chrome above.
+REC_PANEL = "#1b1b1f"       # panel body
+REC_PANEL_2 = "#232329"     # raised rows / chips
+REC_BORDER = "#34343c"      # hairline separators
+REC_TRACK = "#2c2c33"       # unfilled countdown ring
+REC_TEXT = "#f4f4f6"        # primary text
+REC_TEXT_MUTED = "#a7a7b2"  # secondary text
+REC_TEXT_FAINT = "#6f6f7c"  # captions
+REC_ACCENT = "#8b7bff"      # Premiere-style violet
+REC_ACCENT_HI = "#b3a6ff"   # accent highlight for the ring sweep
+REC_REC = "#ff5155"         # the live "recording" red
+
 STYLESHEET = f"""
 * {{
     font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
