@@ -100,12 +100,14 @@ class LibraryView(QWidget):
                 w.deleteLater()
         projects = storage.list_projects()
         if not projects:
-            empty = QLabel("No recordings yet.\nStart a new recording or import a video to begin.")
+            empty = QLabel("No projects yet.\n\nClick “●  New recording” to capture your screen,\nor “⬆  Import video” to edit an existing file.")
             empty.setObjectName("Muted")
             empty.setAlignment(Qt.AlignCenter)
             self._grid.addWidget(empty, 0, 0, 1, 3)
             return
         cols = 3
+        for c in range(cols):
+            self._grid.setColumnStretch(c, 1)
         for i, p in enumerate(projects):
             card = ProjectCard(p)
             card.clicked.connect(self.openProject.emit)
