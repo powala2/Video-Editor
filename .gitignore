@@ -1,8 +1,17 @@
-# Dependencies
-node_modules/
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
 
-# Electron build output
-dist/
+# PyInstaller / packaging output
+/build/
+/dist/
+/installer_out/
+
+# Node (legacy-web prototype)
+node_modules/
 
 # OS / editor cruft
 .DS_Store
@@ -10,6 +19,4 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
-
-# Local dev
 *.log

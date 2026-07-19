@@ -1,10 +1,8 @@
 name: Build Windows app
 
-# Builds the Windows .exe on a GitHub-hosted Windows runner (which, unlike a
-# local restricted network, can download Electron). Runs automatically on
-# every push to the implementation branch, and can be started by hand from the
-# Actions tab ("Run workflow"). Pushing a version tag (e.g. v1.0.0) also
-# attaches the .exe files to a GitHub Release.
+# Builds the Python (PySide6) desktop app into a Windows installer + a portable
+# zip on a GitHub-hosted Windows runner. Runs on push to the implementation
+# branch, on manual dispatch, and on version tags (which also publish a Release).
 
 on:
   push:
@@ -25,27 +23,45 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          node-version: 20
+          python-version: '3.11'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller==6.11.1
 
-      - name: Build Windows installer + portable exe
-        run: npm run dist -- --win --x64
+      - name: Build the app (PyInstaller)
+        run: pyinstaller --noconfirm VideoStudio.spec
 
-      - name: Upload the .exe files as a downloadable artifact
+      - name: Package portable zip
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "dist/Video Studio/*" -DestinationPath "VideoStudio-Windows-portable.zip" -Force
+
+      - name: Build installer (Inno Setup)
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress -y
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Video-Studio-Windows
-          path: dist/*.exe
+          path: |
+            installer_out/VideoStudioSetup.exe
+            VideoStudio-Windows-portable.zip
           if-no-files-found: error
           retention-days: 30
 
-      - name: Attach .exe files to a Release (tagged builds only)
+      - name: Attach to Release (tagged builds only)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.exe
+          files: |
+            installer_out/VideoStudioSetup.exe
+            VideoStudio-Windows-portable.zip

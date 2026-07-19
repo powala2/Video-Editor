@@ -1,107 +1,101 @@
 # Video Studio
 
-A screen-recording and lightweight video editor for the Water Resources training
-program. Record your screen (or import a video), then trim, caption, and add zoom
-highlights — and save the finished video back to your device to re-open and keep
-editing later.
+A real desktop **screen recorder and video editor** for the Water Resources
+training program. Record your screen, trim and split the footage, add zoom
+highlights and captions, then export a finished MP4 — all in a native app.
 
-Implemented from the **Video Studio** Claude Design project
-(`Video Studio.dc.html`).
+Built with **Python + PySide6 (Qt)**, with a bundled **ffmpeg** doing the video
+work, so there is nothing extra to install.
 
-![Home](docs/home.png)
+![Editor](docs/editor.png)
 
-## What it does
+> This replaces the earlier web/Electron design prototype (now in
+> [`legacy-web/`](legacy-web/)), where most of the editing controls were
+> decorative. Here they actually work.
 
-- **Studio home** — a gallery of your recordings plus a one-click *New recording*
-  card.
-- **Recording flow** — a source picker (full screen / app window / browser tab)
-  with webcam, microphone, and system-audio toggles, a 3-second countdown, and a
-  live recording HUD. Uses the browser's real `getDisplayMedia` +
-  `MediaRecorder` APIs; if screen capture is blocked it falls back to a sample
-  project so the editor is always explorable.
-- **Editor** — a three-column editing workspace:
-  - *Left rail*: media bin, record, text/callouts, and audio panels.
-  - *Center*: a 16:9 preview stage with transport controls (play/pause, scrub,
-    1× / 1.5× / 2× speed) driving a real `<video>` element for imported or
-    recorded clips.
-  - *Right rail*: an auto-generated, clickable transcript and a per-clip
-    properties panel (zoom, volume, playback speed, smooth-cursor, drop-shadow).
-  - A multi-lane **timeline** (zoom, screen, webcam, captions, audio) with
-    split / trim / delete / add-zoom tools and a synced playhead.
-- **Import & save** — import any local `video/*` file, and *Save video* downloads
-  the current clip to your device.
-- **Light / dark theme** — toggle in the header; the choice is remembered in
-  `localStorage`.
+## What actually works
 
-## Running it
+- **Screen recording** — capture your screen (plus microphone) straight to a
+  clip via ffmpeg, with a 3-2-1 countdown and a live recording HUD.
+- **Import** any `.mp4 / .mov / .webm / .mkv / .avi` file.
+- **Playback** the timeline with real transport: play/pause, scrub, 1× / 1.5× /
+  2× speed, and volume.
+- **Edit the timeline** — clips laid end to end that you can:
+  - **Split** at the playhead,
+  - **Trim** by dragging a clip's left/right edge,
+  - **Delete**,
+  - reorder by editing (ripple is automatic).
+- **Zoom highlights** — add a push-in over any range, with adjustable level and
+  focus point; rendered into the exported video.
+- **Captions** — add text over any range; shown live in the preview and burned
+  into the export.
+- **Per-clip properties** — playback speed and volume.
+- **Export** — renders the whole edit (trim + concat + zoom + captions) to an
+  MP4 with a progress bar. Projects auto-save and reappear on the home screen.
 
-Video Studio is packaged as a **desktop app** (Electron). The same files also
-run in a plain browser if you prefer — see *Run in a browser* below.
+![Studio](docs/library.png)
 
-### Desktop app (Electron)
+### Preview vs. export
+The preview plays your trimmed clips in sequence and overlays captions live.
+**Zoom** is shown as a marker on the timeline and applied when you **Export** —
+compositing a live push-in on the preview frame isn't worth the cost, so the
+final render is the source of truth for zoom.
 
-```bash
-npm install     # downloads Electron on first run
-npm start       # launches the desktop app
-```
+## Get the Windows app (no tools needed)
 
-Build installable distributables for the current platform:
+Every push builds a Windows installer and a portable zip in the cloud:
 
-```bash
-npm run dist    # → dist/  (.dmg/.zip on macOS, .exe on Windows, .AppImage/.deb on Linux)
-npm run pack    # unpacked app directory only (faster, for local testing)
-```
+1. Open the repo on GitHub → **Actions** → the latest **Build Windows app** run.
+2. Download the **`Video-Studio-Windows`** artifact. It contains:
+   - **`VideoStudioSetup.exe`** — installer (Start-menu + optional desktop shortcut).
+   - **`VideoStudio-Windows-portable.zip`** — unzip and run `Video Studio.exe`, no install.
 
-The desktop shell (`main.js`) hosts the app in a native window and wires up the
-pieces Electron doesn't provide automatically:
+The app isn't code-signed, so Windows may show **"Windows protected your PC"** the
+first time — click **More info → Run anyway**.
 
-- **Screen capture** — services `getDisplayMedia()` via a
-  `setDisplayMediaRequestHandler`. On macOS 15+/Windows it defers to the native
-  source picker; elsewhere it grants the primary screen so *New recording*
-  always captures.
-- **Microphone/camera permissions** — granted through a permission handler.
-- External links open in the user's real browser.
-
-### Run in a browser
-
-It's also a static site with no build step — serve the folder over HTTP:
+## Run from source
 
 ```bash
-python3 -m http.server 8000    # then visit http://localhost:8000/
+python -m venv .venv
+# Windows:  .venv\Scripts\activate     macOS/Linux:  source .venv/bin/activate
+pip install -r requirements.txt
+python main.py
 ```
 
-> **Secure context.** Screen capture and microphone access require a *secure
-> context*. The Electron window and `http://localhost` / `https://` origins all
-> qualify. Opening `index.html` directly via `file://` in a browser works for
-> everything except live capture, which falls back to the sample recording.
+Python 3.10+ recommended. ffmpeg is provided by `imageio-ffmpeg`, so you don't
+need to install it separately. Screen recording uses the OS capture backend
+(Windows `gdigrab`, macOS `avfoundation`, Linux `x11grab`).
 
-## How it's built
+## Build the installer yourself
 
-The UI is authored in Claude Design's `.dc.html` component format and rendered by
-its runtime — no framework build tooling required.
+```bash
+pip install pyinstaller
+pyinstaller --noconfirm VideoStudio.spec      # -> dist/Video Studio/
+# Windows, with Inno Setup installed:
+iscc installer.iss                            # -> installer_out/VideoStudioSetup.exe
+```
+
+## Project layout
 
 | Path | Role |
 | --- | --- |
-| `main.js` | Electron main process — creates the native window, loads `index.html`, and wires up `getDisplayMedia`/permission handling. |
-| `preload.js` | Minimal, context-isolated preload (no Node exposed to page code). |
-| `package.json` | App metadata, `start`/`dist`/`pack` scripts, and the electron-builder config. |
-| `build/icon.png` | App icon (used when packaging). |
-| `index.html` | The Video Studio component: template (`<x-dc>` markup) + logic (`class Component extends DCLogic`). |
-| `support.js` | The Claude Design runtime — parses the `<x-dc>` template DSL (`sc-if`, `sc-for`, `{{ }}` bindings) and renders it with React. |
-| `vendor/react*.js` | React 18.3.1 UMD builds, vendored locally so the app runs with no external CDN dependency (the runtime skips its CDN fetch when `window.React` is already present). |
-| `_ds/…/` | The **GHA Water Resources** design system: color / typography / spacing / effect tokens, base resets, and the component bundle. This is what gives every screen its palette, fonts, radii, and shadows. |
+| `main.py` | Launcher (`python main.py`). |
+| `videostudio/model.py` | Pure edit-decision model: clips, zooms, captions; split/trim/delete; JSON save/load. |
+| `videostudio/media.py` | Locate ffmpeg (bundled) and probe media. |
+| `videostudio/captions.py` | Render caption PNGs (Pillow) for overlay. |
+| `videostudio/export.py` | Build the ffmpeg filter graph and render the final video. |
+| `videostudio/recorder.py` | Screen + mic recording via ffmpeg. |
+| `videostudio/storage.py` | Where projects/recordings live (per-user app data). |
+| `videostudio/theme.py` | Palette + Qt stylesheet (comfortable sizing). |
+| `videostudio/ui/` | Qt UI: main window, library, editor, preview, timeline, properties, dialogs. |
+| `VideoStudio.spec`, `installer.iss` | PyInstaller + Inno Setup packaging. |
+| `packaging/`, `videostudio/assets/` | App icons and bundled fonts. |
+| `legacy-web/` | The superseded web/Electron prototype. |
 
-The renderer is protocol-agnostic — the same `index.html` runs unchanged in the
-Electron window (`file://`), over `http://localhost`, or on any static host.
+## Notes & limits (v1)
 
-Fonts (Newsreader + Hanken Grotesk) are pulled from Google Fonts via an `@import`
-in the design system's `styles.css`, matching how the source project links them;
-offline they fall back to system fonts.
-
-### Note on the port
-
-The design authored its hover micro-interactions as inline
-`onmouseenter="this.style…"` DOM handlers. React requires real event-listener
-functions, so those were moved into named handlers on the component
-(`hEnter1`, `hLeaveTransform`, …) and bound through the template — the visible
-behavior is unchanged.
+- Editing is non-destructive; your source files are never modified.
+- A single video track with captions and zoom tracks. Picture-in-picture webcam
+  and multi-video-track compositing aren't in this version.
+- Caption text is burned in with a bundled font (the static ffmpeg build has no
+  `drawtext`), rendered via Pillow for identical output on every machine.
